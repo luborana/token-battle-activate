@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Token大作战 · 激活中心</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{min-height:100vh;background:#0a0e1a;color:#e0e0e8;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;display:flex;flex-direction:column;align-items:center;padding:32px 20px 60px}
+.card{width:100%;max-width:380px;background:#10141f;border:1px solid #1f2637;border-radius:14px;padding:24px 20px}
+h1{font-size:20px;color:#4a9ad9;text-align:center;letter-spacing:1px}
+.sub{font-size:12px;color:#8a90a8;text-align:center;margin-top:6px}
+.step-title{font-size:14px;font-weight:700;color:#e8a317;margin:22px 0 10px}
+label{font-size:12px;color:#8a90a8;display:block;margin-bottom:6px}
+input{width:100%;height:46px;font-size:18px;letter-spacing:3px;text-align:center;color:#e0e0e8;background:#121828;border:1px solid #2a3048;border-radius:8px;outline:none;text-transform:uppercase}
+input:focus{border-color:#4a9ad9}
+.btn{width:100%;height:48px;margin-top:18px;background:#1a3a6e;border:1px solid #4a9ad9;border-radius:8px;color:#a0d8ff;font-size:16px;font-weight:700;cursor:pointer}
+.btn:active{opacity:.8}
+.result{display:none;margin-top:20px;padding:16px;background:#14202e;border:1px solid #4a9ad9;border-radius:10px;text-align:center}
+.result .code{font-size:32px;font-weight:700;color:#ffd700;letter-spacing:4px;margin-top:6px}
+.result .tip{font-size:12px;color:#8a90a8;margin-top:8px}
+.error{display:none;margin-top:12px;font-size:13px;color:#ff6b6b;text-align:center}
+.guide{font-size:12px;color:#6a7288;line-height:1.8;margin-top:24px}
+.guide b{color:#8a90a8}
+.footer{margin-top:28px;font-size:11px;color:#3a4258;text-align:center}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>Token大作战</h1>
+<div class="sub">自助激活中心 · 无需等待人工发码</div>
+<div class="step-title">① 输入卡密</div>
+<label>付款后自动发送给你的 8 位卡密</label>
+<input id="cardKey" maxlength="8" placeholder="XXXXXXXX" autocomplete="off">
+<div class="step-title">② 输入设备码</div>
+<label>手环上游戏激活页显示的 6 位数字</label>
+<input id="deviceCode" maxlength="6" placeholder="000000" inputmode="numeric" autocomplete="off">
+<button class="btn" onclick="generate()">生成激活码</button>
+<div class="error" id="error"></div>
+<div class="result" id="result">
+<div style="font-size:13px;color:#8a90a8">你的激活码</div>
+<div class="code" id="actCode">--------</div>
+<div class="tip">回到手环，在激活页输入这 8 位数字即可永久解锁</div>
+</div>
+<div class="guide">
+<b>激活流程：</b><br>
+1. 手环上打开游戏，记下 6 位设备码<br>
+2. 在本页输入卡密和设备码，生成激活码<br>
+3. 回到手环输入激活码，完成激活<br>
+<br>
+<b>注意：</b>每个卡密对应你的购买凭证，请妥善保管，不要泄露给他人。
+</div>
+</div>
+<div class="footer">Token大作战 · 卡密激活</div>
+<script>
+var KS='T0k3nB@ttl3Vela';
+function calcCode(dc,cardKey){var s=String(dc)+'|'+String(cardKey||'')+'|'+KS;var h=5381;for(var i=0;i<s.length;i++)h=((h*33)+s.charCodeAt(i))>>>0;h=(h^0x5a17e55b)>>>0;return('00000000'+(h%100000000)).slice(-8)}
+var CS='C@rdK3y#2026';
+function cardHash(k){var s=String(k).toUpperCase()+'|'+CS;var h=5381;for(var i=0;i<s.length;i++)h=((h*33)+s.charCodeAt(i))>>>0;return(h^0x1b873593)>>>0}
+var VALID_HASHES=[2185337297,39948265,4200252069,2037891770,887872723,4127143558,2607652043,1502244973,2959845371,4190963019,1676016742,3024519838,131737831,3922059218,457663812,2149717507,2141570048,910766454,287708404,3084745285,4244378501,4154013959,1715080728,1097632215,2779570826,1388102750,3238319307,3142673232,2328343211,469198620,1195273090,1350714747,40594030,1689566560,4204323661,2882800142,4060306142,1351145414,1287981369,3394187465,1255333229,3151712068,766222637,1196811045,1382724606,1526449833,3109295208,1018048594,288204031,1096197933];
+function showError(msg){var el=document.getElementById('error');el.textContent=msg;el.style.display='block';document.getElementById('result').style.display='none'}
+function generate(){var card=document.getElementById('cardKey').value.trim().toUpperCase();var dc=document.getElementById('deviceCode').value.trim();document.getElementById('error').style.display='none';if(card.length!==8){showError('卡密应为 8 位字符');return}if(!/^[0-9]{6}$/.test(dc)){showError('设备码应为 6 位数字');return}if(VALID_HASHES.length===0){showError('激活服务尚未配置卡密，请联系作者');return}if(VALID_HASHES.indexOf(cardHash(card))<0){showError('卡密无效，请核对后重试');return}document.getElementById('actCode').textContent=calcCode(dc,card);document.getElementById('result').style.display='block';document.getElementById('result').scrollIntoView({behavior:'smooth'})}
+</script>
+</body>
+</html>
